@@ -1,154 +1,189 @@
 <!DOCTYPE html>
 <html lang="en-us">
-    <head>
-        <meta charset="utf-8" />
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="HandheldFriendly" content="True" />
-        <meta name="MobileOptimized" content="320" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-        <title>LeffIT| 2D Football Game</title>
+    <meta
+      name="viewport"
+      content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-        <style>
-            html,
-            body {
-                margin: 0;
-                padding: 0;
-                background: #494747;
-            }
+    <title>LeffIT | 2D Football Game</title>
 
-            #game-container {
-                justify-content: center;
-                display: flex;
-            }
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
 
-            #unity-container {
-                flex: 0 0 auto;
-                width: auto;
-            }
+        overflow: hidden;
+        overscroll-behavior: none;
+        touch-action: none; 
+      }
 
-            @media (max-width: 400px) {
-                #unity-container {
-                    flex: 0 0 auto;
-                    width: 100%;
-                }
-            }
-            #loading-overlay {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
+      #unity-container {
+        position: fixed;
+        inset: 0; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+      }
 
-                display: flex;
-                align-items: center;
-                justify-content: center;
+      #unity-canvas {
+        width: 100vw;
+        height: 100vh;
+        display: block;
 
-                font-size: 2rem;
-                font-weight: bold;
-                color: #ffffff;
-                background: rgba(0, 0, 0, 0.4);
+        object-fit: contain;
 
-                z-index: 9999;
-            }
+        background: url("Build/v.1.0.jpg") center/cover no-repeat;
+        touch-action: none;
+      }
 
-            #loading-overlay .loading-text {
-                transform: translateY(-20%);
-            }
+      /* Overlay загрузки */
+      #loading-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 9999;
+        pointer-events: none;
+      }
 
-            #loading-overlay .dots span {
-                opacity: 0;
-                animation: loading-dots 1s infinite;
-            }
+      #loading-overlay .loading-text {
+        transform: translateY(-20%);
+      }
 
-            #loading-overlay .dots span:nth-child(1) {
-                animation-delay: 0s;
-            }
+      #loading-overlay .dots span {
+        opacity: 0;
+        animation: loading-dots 1s infinite;
+      }
 
-            #loading-overlay .dots span:nth-child(2) {
-                animation-delay: 0.2s;
-            }
+      #loading-overlay .dots span:nth-child(1) {
+        animation-delay: 0s;
+      }
+      #loading-overlay .dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      #loading-overlay .dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
 
-            #loading-overlay .dots span:nth-child(3) {
-                animation-delay: 0.4s;
-            }
+      @keyframes loading-dots {
+        0% {
+          opacity: 0;
+        }
+        30% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
 
-            @keyframes loading-dots {
-                0% {
-                    opacity: 0;
-                }
-                30% {
-                    opacity: 1;
-                }
-                100% {
-                    opacity: 0;
-                }
-            }
-        </style>
-    </head>
+      #start-overlay {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9998;
+        background: rgba(0, 0, 0, 0.55);
+      }
 
-    <body style="text-align: center; padding: 0; border: 0; margin: 0">
-        <div id="game-container">
-            <div id="loading-overlay">
-                <div class="loading-text">
-                    Loading
-                    <span class="dots">
-                        <span>.</span>
-                        <span>.</span>
-                        <span>.</span>
-                    </span>
-                </div>
-            </div>
-            <div id="unity-container" class="text-center">
-                <canvas class="unity-on-page" id="unity-canvas" width="800" height="450" tabindex="-1" style="width: 800px; height: 450px; background: url('Build/v.1.0.jpg') center/cover"></canvas>
-            </div>
-        </div>
+      #start-overlay button {
+        font-size: 18px;
+        padding: 14px 18px;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+      }
 
-        <script src="Build/v.1.0.loader.js"></script>
+      #start-overlay.hidden {
+        display: none;
+      }
+    </style>
+  </head>
 
-        <script>
-            createUnityInstance(document.querySelector('#unity-canvas'), {
-                arguments: [],
-                dataUrl: 'Build/v.1.0.data',
-                frameworkUrl: 'Build/v.1.0.framework.js',
-                codeUrl: 'Build/v.1.0.wasm',
-                streamingAssetsUrl: 'StreamingAssets',
-                companyName: 'LeffIt',
-                productName: '2DFootballGame',
-                productVersion: '0.2',
-                // matchWebGLToCanvasSize: true, // Uncomment this to separately control WebGL canvas render size and DOM element size.
-                devicePixelRatio: 2, // Uncomment this to override low DPI rendering on high DPI displays.
-            })
-                .then(unityInstance => {
-                    document.getElementById('loading-overlay').style.display = 'none';
-                })
-                .catch(message => {
-                    alert(message);
-                });
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+    </div>
 
-            function adjustCanvasSize() {
-                const canvas = document.getElementById('unity-canvas');
-                if (!canvas) return;
+    <div id="loading-overlay">
+      <div class="loading-text">
+        Loading
+        <span class="dots">
+          <span>.</span><span>.</span><span>.</span>
+        </span>
+      </div>
+    </div>
 
-                const aspectRatio = 1600 / 900;
-                const screenW = window.innerWidth;
-                const screenH = window.innerHeight;
+    <div id="start-overlay">
+      <button id="start-btn">Tap to Start</button>
+    </div>
 
-                let width = screenW;
-                let height = width / aspectRatio;
+    <script src="Build/v.1.0.loader.js"></script>
 
-                if (height > screenH) {
-                    height = screenH;
-                    width = height * aspectRatio;
-                }
+    <script>
+      const canvas = document.getElementById("unity-canvas");
+      const loadingOverlay = document.getElementById("loading-overlay");
+      const startOverlay = document.getElementById("start-overlay");
+      const startBtn = document.getElementById("start-btn");
 
-                canvas.style.width = width + 'px';
-                canvas.style.height = height + 'px';
-            }
+      document.addEventListener(
+        "touchmove",
+        (e) => e.preventDefault(),
+        { passive: false }
+      );
 
-            adjustCanvasSize();
-            window.addEventListener('resize', adjustCanvasSize);
-        </script>
-    </body>
+      function tryFullscreen() {
+        const el = document.documentElement;
+        const req =
+          el.requestFullscreen ||
+          el.webkitRequestFullscreen ||
+          el.mozRequestFullScreen ||
+          el.msRequestFullscreen;
+
+        if (req) {
+          try {
+            req.call(el);
+          } catch (_) {}
+        }
+      }
+
+      let unityInstance = null;
+
+      startBtn.addEventListener("click", async () => {
+        tryFullscreen();
+        startOverlay.classList.add("hidden");
+
+        unityInstance = await createUnityInstance(canvas, {
+          arguments: [],
+          dataUrl: "Build/v.1.0.data",
+          frameworkUrl: "Build/v.1.0.framework.js",
+          codeUrl: "Build/v.1.0.wasm",
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "LeffIt",
+          productName: "2DFootballGame",
+          productVersion: "0.2",
+          matchWebGLToCanvasSize: true,
+          devicePixelRatio: window.devicePixelRatio || 1,
+        });
+
+        loadingOverlay.style.display = "none";
+      });
+    </script>
+  </body>
 </html>
